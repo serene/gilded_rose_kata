@@ -43,6 +43,17 @@ describe GildedRose do
       end
     end
 
+    context 'when sell by has passed' do
+      let(:item) { Item.new("Orchid", 0, 10) }
+
+      it 'decreases quality by 2' do
+        subject
+
+        expect(item.sell_in).to eq -1
+        expect(item.quality).to eq 8
+      end
+    end
+
     describe 'edge cases for special items' do
       let(:item) { Item.new(name, 10, 10) }
 
@@ -56,7 +67,6 @@ describe GildedRose do
           expect(item.quality).to eq 11
         end
       end
-
 
       context 'when is "Sulfuras, Hand of Ragnaros"' do
         let(:name) { "Sulfuras, Hand of Ragnaros" }
