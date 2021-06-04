@@ -8,37 +8,39 @@ class GildedRose
   BACKSTAGE_PASS = "Backstage passes to a TAFKAL80ETC concert"
   SULFURAS = "Sulfuras, Hand of Ragnaros"
 
+  MAX_QUALITY = 50
+
   def update_quality
     @items.each do |item|
+      return if item.name == SULFURAS
+      
       if item.name != AGED_BRIE and item.name != BACKSTAGE_PASS
         decrease_quality(item)
       else
-        if item.quality < Item::MAX_QUALITY
-          item.quality = item.quality + 1
+        increase_quality(item)
 
-          if item.name == BACKSTAGE_PASS
-            if item.sell_in < 11
-              increase_quality(item)
-            end
-            
-            if item.sell_in < 6
-              increase_quality(item)
-            end
+        if item.name == BACKSTAGE_PASS
+          if item.sell_in < 11
+            increase_quality(item)
+          end
+
+          if item.sell_in < 6
+            increase_quality(item)
           end
         end
       end
 
-      item.sell_in = item.sell_in - 1 unless item.name == SULFURAS
+      item.sell_in = item.sell_in - 1
 
       if item.sell_in < 0
-        if item.name != AGED_BRIE
+        if item.name == AGED_BRIE
+          increase_quality(item)
+        else
           if item.name != BACKSTAGE_PASS
             decrease_quality(item)
           else
             item.quality = item.quality - item.quality
           end
-        else
-          increase_quality(item)
         end
       end
     end
@@ -55,15 +57,13 @@ class GildedRose
   end
 
   def increase_quality(item)
-    if item.quality < Item::MAX_QUALITY
+    if item.quality < MAX_QUALITY
       item.quality = item.quality + 1
     end
   end
 end
 
 class Item
-  MAX_QUALITY = 50
-
   attr_accessor :name, :sell_in, :quality
 
   def initialize(name, sell_in, quality)
