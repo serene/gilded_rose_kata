@@ -14,24 +14,28 @@ class GildedRose
     @items.each do |item|
       return if item.name == SULFURAS
 
-      if quality_increases_over_time?(item)
-        increase_quality(item)
+      item.sell_in = item.sell_in - 1
 
-        if item.name == BACKSTAGE_PASS
-          increase_quality(item) if item.sell_in < 11
-          increase_quality(item) if item.sell_in < 6
-        end
+      if quality_increases_over_time?(item)
+        age_item(item)
       else
         decrease_quality(item)
       end
-
-      item.sell_in = item.sell_in - 1
 
       update_expired_quality(item) if item.sell_in < 0
     end
   end
 
   private
+
+  def age_item(item)
+    increase_quality(item)
+
+    if item.name == BACKSTAGE_PASS
+      increase_quality(item) if item.sell_in < 10
+      increase_quality(item) if item.sell_in < 5
+    end
+  end
 
   def quality_increases_over_time?(item)
     item.name == AGED_BRIE || item.name == BACKSTAGE_PASS
@@ -50,7 +54,7 @@ class GildedRose
   end
 
   def decrease_quality(item)
-    item.quality = item.quality - 1 if item.quality > 0
+    item.quality = [item.quality - 1, 0].max
   end
 
   def increase_quality(item)
