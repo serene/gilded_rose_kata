@@ -13,53 +13,48 @@ class GildedRose
   def update_quality
     @items.each do |item|
       return if item.name == SULFURAS
-      
-      if item.name != AGED_BRIE and item.name != BACKSTAGE_PASS
-        decrease_quality(item)
-      else
+
+      if quality_increases_over_time?(item)
         increase_quality(item)
 
         if item.name == BACKSTAGE_PASS
-          if item.sell_in < 11
-            increase_quality(item)
-          end
-
-          if item.sell_in < 6
-            increase_quality(item)
-          end
+          increase_quality(item) if item.sell_in < 11
+          increase_quality(item) if item.sell_in < 6
         end
+      else
+        decrease_quality(item)
       end
 
       item.sell_in = item.sell_in - 1
 
-      if item.sell_in < 0
-        if item.name == AGED_BRIE
-          increase_quality(item)
-        else
-          if item.name != BACKSTAGE_PASS
-            decrease_quality(item)
-          else
-            item.quality = item.quality - item.quality
-          end
-        end
-      end
+      update_expired_quality(item) if item.sell_in < 0
     end
   end
 
   private
 
-  def decrease_quality(item)
-    if item.quality > 0
-      if item.name != SULFURAS
-        item.quality = item.quality - 1
+  def quality_increases_over_time?(item)
+    item.name == AGED_BRIE || item.name == BACKSTAGE_PASS
+  end
+
+  def update_expired_quality(item)
+    if item.name == AGED_BRIE
+      increase_quality(item)
+    else
+      if item.name == BACKSTAGE_PASS
+        item.quality = item.quality - item.quality
+      else
+        decrease_quality(item)
       end
     end
   end
 
+  def decrease_quality(item)
+    item.quality = item.quality - 1 if item.quality > 0
+  end
+
   def increase_quality(item)
-    if item.quality < MAX_QUALITY
-      item.quality = item.quality + 1
-    end
+    item.quality = [item.quality + 1, MAX_QUALITY].min
   end
 end
 
